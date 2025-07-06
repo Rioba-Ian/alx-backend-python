@@ -28,3 +28,9 @@ def stream_users_in_batches(batch_size):
     finally:
         cursor.close()
         connection.close()
+
+
+def batch_processing():
+    for batch in stream_users_in_batches(100):
+        filtered_batch = [user for user in batch if user[2] > 25]
+        print(f"Processed batch: {filtered_batch}")
