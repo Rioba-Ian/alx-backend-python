@@ -1,10 +1,8 @@
 
-
 import mysql.connector
 
 
-def stream_users():
-  try :
+try:
     connection = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -12,6 +10,12 @@ def stream_users():
         database="mydatabase"
     )
     cursor = connection.cursor()
+except mysql.connector.Error as err:
+    print(f"Error: {err}")
+    exit(1)
+
+def stream_users():
+  try :
     cursor.execute("SELECT * FROM users")
     for row in cursor:
         yield row
