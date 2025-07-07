@@ -14,7 +14,7 @@ class ExecuteQuery:
     self.params = params
 
 
-  async def __aenter__(self):
+  async def __enter__(self):
     self.connection = mysql.connector.connect(
       host="localhost",
       user="root",
@@ -26,7 +26,7 @@ class ExecuteQuery:
     return self.cursor
 
 
-  async def __aexit__(self, exc_type, exc_val, exc_tb):
+  async def __exit__(self, exc_type, exc_val, exc_tb):
     self.cursor.close()
     self.connection.close()
 

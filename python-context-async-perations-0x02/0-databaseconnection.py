@@ -10,7 +10,7 @@ class DatabaseConnection:
     def __init__(self, db_name):
         self.db_name = db_name
 
-    async def __aenter__(self):
+    async def __enter__(self):
         self.connection = await mysql.connector.connect(
             host="localhost",
             user="root",
@@ -19,7 +19,7 @@ class DatabaseConnection:
         )
         return self.connection
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __exit__(self, exc_type, exc_val, exc_tb):
         await self.connection.close()
 
     async def execute_query(self, query, params=None):
