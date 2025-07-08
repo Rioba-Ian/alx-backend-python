@@ -5,6 +5,7 @@ Decorator to log all SQL queries executed by a function.
 import sqlite3
 import functools
 import os
+import datetime
 
 # -- create dummy database for the example
 DB_FILE = 'users.db'
@@ -33,7 +34,8 @@ def log_queries(func):
             query_arg = args[0]
 
         if query_arg:
-            print(f"Executing query: {query_arg}")
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"LOG [{timestamp}]: Executing query: {query_arg}")
         return func(*args, **kwargs)
     return wrapper
 
