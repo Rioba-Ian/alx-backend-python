@@ -4,6 +4,7 @@ opening and closing database connections automatically
 """
 
 import mysql.connector
+import sqlite3
 import asyncio
 
 class DatabaseConnection:

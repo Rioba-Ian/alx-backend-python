@@ -39,11 +39,16 @@ def cache_query(func):
     @functools.wraps(func)
     def wrapper(conn, query):
         if query in query_cache:
+
+          if time.time() > query_cache[query][1]:
+            print(f"Query '{query}' is expired")
+            del query_cache[query]
+          else:
             print(f"Query '{query}' is cached")
             return query_cache[query]
         result = func(conn, query)
         print(f"Query '{query}' is executed and being cached...")
-        query_cache[query] = result
+        query_cache[query] = {result, time.time() + 3600}
         return result
     return wrapper
 
