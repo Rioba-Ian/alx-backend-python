@@ -2,6 +2,7 @@
 
 
 """Test for client.py that it implements its methods correctly"""
+from requests.models import HTTPError
 from client import GithubOrgClient
 from unittest import TestCase
 from unittest.mock import patch, PropertyMock
@@ -51,3 +52,23 @@ class TestGithubOrgClient(TestCase):
     client = GithubOrgClient("Test value")
     res = client.has_license(repo, license_key)
     self.assertEqual(res, expected)
+
+
+class TestIntegrationGithubOrgClient(TestCase):
+  """Integration test for GithubOrgClient, mocking code that sends external requests"""
+
+  @classmethod
+  def setUpClass(cls):
+    """Method to prepare test fixture"""
+    cls.get_patcher = patch('requests.get', side_effect=HTTPError)
+    cls.get_patcher.start()
+
+  @classmethod
+  def tearDownClass(cls):
+    """Method called after test method has been called"""
+    cls.get_patcher.stop()
+
+
+  def test_public_repos(self):
+    res = GithubOrgClient("Test value")
+    self.assertTrue(res)
