@@ -46,7 +46,6 @@ class TestGetJson(TestCase):
 
 class TestMemoize(unittest.TestCase):
   """Class that defines attributes to test utils.memoize func"""
-
   def test_memoize(self):
     """Method that using test memoizes to check if func is called twice"""
     class TestClass:
@@ -58,6 +57,7 @@ class TestMemoize(unittest.TestCase):
 
       @memoize
       def a_property(self):
+        """Method that defines instance of memoize"""
         return self.a_method()
 
 
