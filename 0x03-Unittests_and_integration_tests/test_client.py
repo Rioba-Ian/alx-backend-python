@@ -29,14 +29,12 @@ class TestGithubOrgClient(TestCase):
       mock.assert_called_once
 
 
-  @patch('client._public_repos_url', return_value={"repos_url", True})
+  @patch('client.get_json', return_value={"name", "Test value"})
   def test_public_repos(self, mock):
     """Method to test that GithubOrgClient.org returns the correct value"""
-
     with patch.object(GithubOrgClient, '_public_repos_url',
              new_callable=PropertyMock,
-    return_value="https://api.github.com/"
-    ) as pub:
+             return_value="https://api.github.com/") as pub:
       client = GithubOrgClient("Test value")
       res = client.public_repos()
 
