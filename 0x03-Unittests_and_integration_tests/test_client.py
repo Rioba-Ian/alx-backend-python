@@ -21,6 +21,7 @@ class TestGithubOrgClient(TestCase):
 
   @patch('client._public_repos_url', return_value={"repos_url", True})
   def test_public_repos_url(self, test_org, mock):
+    """Test that the result of _public_repos_url is the expected one based on mocked payload"""
     client = GithubOrgClient(test_org)
     res = client._public_repos_url
     self.assertEqual(res, mock.return_value)
