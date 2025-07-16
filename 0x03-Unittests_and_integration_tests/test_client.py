@@ -4,7 +4,7 @@
 """Test for client.py that it implements its methods correctly"""
 from client import GithubOrgClient
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 from parameterized import parameterized
 
 class TestGithubOrgClient(TestCase):
@@ -18,3 +18,9 @@ class TestGithubOrgClient(TestCase):
     res = client.org
     self.assertEqual(res, mock.return_value)
     mock.assert_called_once
+
+  @patch('client._public_repos_url', return_value={"repos_url", True})
+  def test_public_repos_url(self, test_org, mock):
+    client = GithubOrgClient(test_org)
+    res = client._public_repos_url
+    self.assertEqual(res, mock.return_value)
