@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from  unittest import TestCase
+import unittest
 from unittest.mock import patch
 from parameterized import parameterized
 from utils import access_nested_map, get_json, memoize
@@ -43,11 +44,11 @@ class TestGetJson(TestCase):
     self.assertEquals(res, test_payload)
 
 
-class TestMemoize(TestCase):
+class TestMemoize(unittest.TestCase):
   """Class that defines attributes to test utils.memoize func"""
-  def test_momoize(self):
-    """Method that using test memoizes to check if func is called twice"""
 
+  def test_memoize(self):
+    """Method that using test memoizes to check if func is called twice"""
     class TestClass:
       """Class that defines attributes to test memoize"""
 
