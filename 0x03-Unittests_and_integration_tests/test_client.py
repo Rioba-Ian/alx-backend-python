@@ -6,7 +6,8 @@ from requests.models import HTTPError
 from client import GithubOrgClient
 from unittest import TestCase
 from unittest.mock import patch, PropertyMock
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
+from fixtures import TEST_PAYLOAD
 
 class TestGithubOrgClient(TestCase):
   """Testcase for testing GithubOrgClient class and its methods"""
@@ -53,7 +54,7 @@ class TestGithubOrgClient(TestCase):
     res = client.has_license(repo, license_key)
     self.assertEqual(res, expected)
 
-
+@parameterized_class(("org_payload", "repos_payload", "expected_repos", "apache2_repos"), TEST_PAYLOAD)
 class TestIntegrationGithubOrgClient(TestCase):
   """Integration test for GithubOrgClient, mocking code that sends external requests"""
 
