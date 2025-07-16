@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 
-import unittest
+from  unittest import TestCase
 from parameterized import parameterized
 from utils import access_nested_map
 
 
-class TestAccessNestedMap(unittest.TestCase):
+class TestAccessNestedMap(TestCase):
+  """Class that defines attributes to test utils.access_nested_map func"""
   @parameterized.expand([
-    {"nested_map": {"a": 1}, "path": ("a",), "expected": 1},
-    {"nested_map": {"a": {"b": 2}}, "path": ("a",), "expected": {"b": 2}},
-    {"nested_map": {"a": {"b": 2}}, "path": ("a", "b"), "expected": 2}
+    ({"a": 1},("a",), 1),
+    ({"a": {"b": 2}},  ("a",), {"b": 2}),
+    ( {"a": {"b": 2}}, ("a", "b"), 2)
   ])
   def test_access_nested_map(self, nested_map, path, expected):
+    """Method to test that access nested map returns the right result"""
     self.assertEqual(access_nested_map(nested_map, path), expected)
-
-
-if __name__ == "__main__":
-  unittest.main()
