@@ -31,7 +31,6 @@ class TestAccessNestedMap(TestCase):
 
 class TestGetJson(TestCase):
   """Class that defines attributes to test utils.get_json func"""
-
   @parameterized.expand([
   ("http://example.com", {"payload": True}),
   ("http://holberton.io", {"payload": False}),
