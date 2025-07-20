@@ -73,3 +73,7 @@ class TestIntegrationGithubOrgClient(TestCase):
   def test_public_repos(self):
     res = GithubOrgClient("Test value")
     self.assertTrue(res)
+
+  # @parameterized.expand()
+  # def test_public_repos_with_license(self):
+  #   res = GithubOrgClient("Test value").has_license()
