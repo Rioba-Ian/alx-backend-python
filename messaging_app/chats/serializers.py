@@ -76,6 +76,11 @@ class ConversationSerializer(serializers.ModelSerializer):
             else 0
         )
 
+    def validate(self, data):
+        if "participants_id" not in data or not data["participants_id"]:
+            raise serializers.ValidationError("At least one participant is required.")
+        return data
+
     def create(self, validated_data):
         participants = validated_data.pop("participants_id", [])
         conversation = Conversation.objects.create(**validated_data)
