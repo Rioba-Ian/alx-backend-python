@@ -3,11 +3,20 @@ from rest_framework.response import Response
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from django.shortcuts import get_object_or_404
-
-
+import django_filters
+from .filters import MessageFilter
+from .pagination import StandardResultsSetPagination
 from .permissions import IsOwnerOrParticipant
 
 # Create your views here.
+
+
+class ConversationFilter(django_filters.FilterSet):
+    created_at = django_filters.DateTimeFromToRangeFilter()
+
+    class Meta:
+        model = Conversation
+        fields = ["created_at"]
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -22,8 +31,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return user.conversations.all().prefetch_related(
-            "participants_id", "message_set"
+        return (
+            Conversation.objects.filter(participants__in=[user])
+            .select_related("owner")
+            .prefetch_related("participants")
         )
 
     def create(self, request, *args, **kwargs):
@@ -61,6 +72,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrParticipant]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = filters.DjangoFilterBackend
+    filterset_class = MessageFilter
 
     def get_queryset(self):
         conversation_id = self.kwargs.get("conversation_id")
