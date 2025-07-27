@@ -1,0 +1,7 @@
+{
+    "info": {
+        "name": "Messaging App",
+        "description": "API for a messaging application with conversations and messages.",
+        "version": "1.0.0"
+    }
+}
