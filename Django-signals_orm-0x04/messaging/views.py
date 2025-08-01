@@ -8,6 +8,8 @@ from .filters import MessageFilter
 from .pagination import StandardResultsSetPagination
 from .permissions import IsOwnerOrParticipant
 
+from rest_framework.decorators import api_view, permission_classes
+
 # Create your views here.
 
 
@@ -112,3 +114,31 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sender_id=self.request.user)
+
+
+@api_view(["DELETE"])
+@permission_classes([permissions.IsAuthenticated])
+def delete_user(request):
+    """
+    Delete the currently authenticated user and all their associated data.
+    """
+    try:
+        user = request.user
+        if user.is_authenticated:
+            user.delete()
+            return Response(
+                {
+                    "detail": "User deleted successfully and all associated data have been deleted."
+                },
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        else:
+            return Response(
+                {"detail": "User not authenticated."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+    except Exception as e:
+        return Response(
+            {"detail": f"Error deleting user: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
