@@ -42,6 +42,9 @@ class Message(models.Model):
         CustomUser, on_delete=models.CASCADE, related_name="received_messages"
     )
     content = models.TextField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    unread = UnreadMessagesManager()
+
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
 
@@ -53,8 +56,6 @@ class MessageHistory(models.Model):
     )
     previous_content = models.TextField(null=True, blank=True)
     edited_at = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-    unread = UnreadMessagesManager()
     edited_by = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="edited_messages"
     )

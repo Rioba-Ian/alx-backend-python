@@ -7,6 +7,7 @@ import django_filters
 from .filters import MessageFilter
 from .pagination import StandardResultsSetPagination
 from .permissions import IsOwnerOrParticipant
+from rest_framework.views import APIView
 
 from rest_framework.decorators import api_view, permission_classes
 
@@ -114,6 +115,16 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sender_id=self.request.user)
+
+
+class UnreadMessagesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        unread_messages = Message.unread.unread_for_user(user)
+        serializer = MessageSerializer(unread_messages, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(["DELETE"])

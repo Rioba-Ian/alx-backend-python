@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Conversation, Message
+from .models import CustomUser, Conversation, Message, MessageHistory, Notification
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -86,3 +86,33 @@ class ConversationSerializer(serializers.ModelSerializer):
         conversation = Conversation.objects.create(**validated_data)
         conversation.participants_id.set(participants)
         return conversation
+
+
+class MessageHistorySerializer(serializers.ModelSerializer):
+    message = MessageSerializer(read_only=True)
+    edited_by = CustomUserSerializer(read_only=True)
+
+    class Meta:
+        model = MessageHistory
+        fields = [
+            "history_id",
+            "message",
+            "previous_content",
+            "edited_at",
+            "edited_by",
+        ]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    user_id = CustomUserSerializer(read_only=True)
+    message_id = MessageSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = [
+            "notification_id",
+            "user_id",
+            "message_id",
+            "is_read",
+            "created_at",
+        ]
