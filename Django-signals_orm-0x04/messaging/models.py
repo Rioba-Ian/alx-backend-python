@@ -42,6 +42,25 @@ class Message(models.Model):
     )
     content = models.TextField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    edited = models.BooleanField(default=False)
+
+
+class MessageHistory(models.Model):
+    history_id = models.AutoField(primary_key=True)
+    message = models.ForeignKey(
+        Message, on_delete=models.CASCADE, related_name="history"
+    )
+    previous_content = models.TextField(null=True, blank=True)
+    edited_at = models.DateTimeField(auto_now_add=True)
+    edited_by = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="edited_messages"
+    )
+
+    class Meta:
+        ordering = ["-edited_at"]
+
+    def __str__(self) -> str:
+        return f"History of message {self.message.message_id} edited {self.edited_by.username} at {self.edited_at}"
 
 
 class Conversation(models.Model):
