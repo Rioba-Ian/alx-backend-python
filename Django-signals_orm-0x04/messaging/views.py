@@ -1,7 +1,12 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.response import Response
-from .models import Conversation, Message
-from .serializers import ConversationSerializer, MessageSerializer
+from .models import Conversation, Message, Notification, MessageHistory
+from .serializers import (
+    ConversationSerializer,
+    MessageSerializer,
+    NotificationSerializer,
+    MessageHistorySerializer,
+)
 from django.shortcuts import get_object_or_404
 import django_filters
 from .filters import MessageFilter
@@ -116,6 +121,11 @@ class MessageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(sender_id=self.request.user)
 
+    def thread(self, request, pk=None):
+        message = self.get_object()
+        threaded = build_threaded_message(message)
+        return Response(threaded, status=status.HTTP_200_OK)
+
 
 class UnreadMessagesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -125,6 +135,31 @@ class UnreadMessagesView(APIView):
         unread_messages = Message.unread.unread_for_user(user)
         serializer = MessageSerializer(unread_messages, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Notification.objects.filter(user_id=user).select_related(
+            "message_id",
+        )
+
+
+class MessageHistoryViewSet(viewsets.ModelViewSet):
+    serializer_class = MessageHistorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return MessageHistory.objects.filter(edited_by=user).select_related(
+            "message", "edited_by"
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(edited_by=self.request.user)
 
 
 @api_view(["DELETE"])
@@ -153,3 +188,22 @@ def delete_user(request):
             {"detail": f"Error deleting user: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+def build_threaded_message(message):
+    """
+    Build a threaded message structure for the given message.
+    """
+    threaded_message = {
+        "message_id": message.message_id,
+        "content": message.content,
+        "sender": message.sender_id.username,
+        "timestamp": message.timestamp,
+        "replies": [],
+    }
+
+    replies = message.replies.all()
+    for reply in replies:
+        threaded_message["replies"].append(build_threaded_message(reply))
+
+    return threaded_message

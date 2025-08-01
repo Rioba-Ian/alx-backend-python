@@ -47,6 +47,24 @@ class Message(models.Model):
 
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
+    edited_by = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="edited_messages", null=True
+    )
+
+    parent_message = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="replies",
+    )
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-timestamp"]
+
+    def __str__(self) -> str:
+        return f"Message {self.message_id} from {self.sender.username} to {self.receiver.username} at {self.timestamp}"
 
 
 class MessageHistory(models.Model):
