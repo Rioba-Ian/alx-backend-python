@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
+from .managers import UnreadMessagesManager
 
 # Create your models here.
 
@@ -52,6 +53,8 @@ class MessageHistory(models.Model):
     )
     previous_content = models.TextField(null=True, blank=True)
     edited_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    unread = UnreadMessagesManager()
     edited_by = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="edited_messages"
     )
