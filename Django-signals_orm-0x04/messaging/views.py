@@ -7,6 +7,7 @@ from .serializers import (
     NotificationSerializer,
     MessageHistorySerializer,
 )
+from django.views.decorators.cache import cache_page
 from django.shortcuts import get_object_or_404
 import django_filters
 from .filters import MessageFilter
@@ -14,7 +15,12 @@ from .pagination import StandardResultsSetPagination
 from .permissions import IsOwnerOrParticipant
 from rest_framework.views import APIView
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    action,
+    method_decorator,
+)
 
 # Create your views here.
 
@@ -81,8 +87,13 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrParticipant]
     pagination_class = StandardResultsSetPagination
-    filter_backends = filters.DjangoFilterBackend
+    # filter_backends = filters.DjangoFilterBackend, filters.SearchFilter
+    search_fields = ["content", "sender_id__username"]
     filterset_class = MessageFilter
+
+    @method_decorator(cache_page(60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         conversation_id = self.kwargs.get("conversation_id")
