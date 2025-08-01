@@ -1,4 +1,4 @@
-from .models import Message, Notification, MessageHistory
+from .models import Message, Notification, MessageHistory, CustomUser
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -34,3 +34,21 @@ def post_save_message_history(sender, instance, created, **kwargs):
         except Message.DoesNotExist:
             # Handle the case where the original message does not exist
             pass
+
+
+@receiver(post_save, sender=CustomUser)
+def cleanup_user_after_delete(sender, instance, **kwargs):
+    """
+    Clean up user-related data after a user is deleted.
+    """
+    # Delete all messages sent by the user
+    Message.objects.filter(sender=instance).delete()
+
+    # Delete all messages received by the user
+    Message.objects.filter(receiver=instance).delete()
+
+    # Delete all notifications related to the user
+    Notification.objects.filter(user_id=instance).delete()
+
+    # Delete all conversations the user was part of
+    MessageHistory.objects.filter(edited_by=instance.id).delete()
