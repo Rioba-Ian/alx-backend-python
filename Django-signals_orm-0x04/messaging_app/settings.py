@@ -37,10 +37,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "chats",
+    "messaging",
     "rest_framework",
     "rest_framework_simplejwt",
-    "chats.apps.ChatsConfig",
+    "messaging.apps.MessagingConfig",  # Updated to use the new app config
 ]
 
 MIDDLEWARE = [

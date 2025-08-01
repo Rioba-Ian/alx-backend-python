@@ -1,9 +1,9 @@
 from django.apps import AppConfig
 
 
-class ChatsConfig(AppConfig):
+class MessagingConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "chats"
+    name = "messaging.apps.ChatsConfig"
 
     def ready(self):
-        import chats.signals
+        import messaging.signals
