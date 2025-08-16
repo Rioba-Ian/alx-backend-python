@@ -1,0 +1,7 @@
+#!/bin/bash/
+set -e
+
+echo "Deploying Blue version ..."
+
+kubectl apply -f blue-deployment.yaml
+kubectl apply -f blue-service.yaml
