@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-app
+  labels:
+    app: messaging-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: messaging-app
+  template:
+    metadata:
+      labels:
+        app: messaging-app
+    spec:
+      containers:
+        - name: messaging-app
+          image: messaging-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: 'messaging_app.settings'
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: messaging-app-secret
+                  key: secret_key
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: messaging-app-secret
+                  key: database_url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: messaging-service-app
+spec:
+  selector:
+    app: messaging-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

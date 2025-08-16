@@ -1,0 +1,26 @@
+#!/bin/bash
+# kubctl-0x01
+# Script to scale Django app to 3 replicas and verify performance
+
+# Scale Django app to 3 replicas
+kubectl scale deployment messaging-app --replicas=3
+
+# Verify performance
+kubectl get pods -l app=messaging-app
+
+# Wait for pods to be ready
+kubectl wait --for=condition=Ready pods -l app=messaging-app --timeout=60s
+
+# Run load test
+kubectl run load-test --image=busybox --restart=Never -- /bin/sh -c "while true; do wget -qO- http://messaging-app.default.svc.cluster.local; sleep 1; done"
+
+# Wait for load test to complete
+kubectl wait --for=condition=Completed pods -l run=load-test --timeout=60s
+
+# Delete load test pod
+kubectl delete pod -l run=load-test
+
+# Clean up resources
+kubectl delete deployment messaging-app
+kubectl delete service messaging-app
+kubectl delete namespace messaging-app
