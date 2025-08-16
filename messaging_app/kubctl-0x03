@@ -1,0 +1,21 @@
+#!/bin/bash/
+
+set -e
+
+DEPLOYMENT_NAME="django-blue"
+NAMESPACE="default"
+
+kubectl apply -f blue_deployment.yaml
+
+kubectl rollout status deployment/$DEPLOYMENT_NAME -n $NAMESPACE
+
+echo "Testing app availability with curl"
+while true; do
+  RESPONSE=$(curl -s http://localhost:8000)
+  TIMESTAMP=$(date +%s)
+  echo="[$TIMESTAMP] $RESPONSE"
+  sleep 1
+
+done
+
+kubectl get pods -l app=django-blue, version=blue
