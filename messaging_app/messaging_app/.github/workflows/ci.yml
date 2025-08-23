@@ -1,0 +1,92 @@
+name: CI
+
+on:
+ push:
+  branches: [main]
+ pull_request:
+  branches: [main]
+
+jobs:
+ test:
+  runs-on: ubuntu-latest
+  services:
+   mysql:
+    image: mysql:8.0
+    env:
+     MYSQL_ROOT_PASSWORD: root
+     MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+     MYSQL_USER: ${{ secrets.DB_USER }}
+     MYSQL_PASSWORD: ${{ secrets.MY_PWD }}
+    ports:
+     - 3306:3306
+    options: >-
+     --health-cmd="mysqladmin ping --silent"
+     --health-interval=10s
+     --health-timeout=5s
+     --health-retries=3
+
+  env:
+   DB_ENGINE: mysql
+   DB_NAME: ${{ secrets.DB_NAME }}
+   DB_USER: ${{ secrets.DB_USER }}
+   DB_PASSWORD: ${{ secrets.MY_PWD }}
+   DB_HOST: 127.0.0.1
+   DB_PORT: 3306
+   SECRET_KEY: test-secret-key-for-ci
+   DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+
+  steps:
+   - name: Checkout repository
+     uses: actions/checkout@v3
+
+   - name: Set up Python
+     uses: actions/setup-python@v4
+     with:
+      python-version: 3.10
+
+   - name: Install dependencies
+     working-directory: messaging_app/messaging_app
+     run: |
+      python -m venv .venv
+      . .venv/bin/activate
+      python -m pip install --upgrade pip
+      pip install -r ../requirements.txt || true
+      pip install -r messaging_app/requirements.txt || true
+      pip install pytest pytest-cov flake8
+
+   # New Step: Run Flake8 Linting
+   - name: Run Flake8 Linting
+     working-directory: messaging_app/messaging_app
+     run: |
+      . .venv/bin/activate
+      echo "Running flake8 linting..."
+      flake8 . --exit-zero --tee > lint_report.txt
+      cat lint_report.txt
+      if grep -q "E" lint_report.txt; then
+        echo "Linting errors detected! Failing the build."
+        exit 1
+      fi
+     continue-on-error: false
+
+   - name: Run tests
+     working-directory: messaging_app/messaging_app
+     run: |
+      . .venv/bin/activate
+      mkdir -p reports
+      pytest -q \
+        --maxfail=1 --disable-warnings \
+        --junitxml=reports/junit.xml \
+        --cov=. --cov-report=xml:reports/coverage.xml
+
+   - name: Upload test results
+     uses: actions/upload-artifact@v3
+     with:
+      name: test-reports
+      path: messaging_app/messaging_app/reports/
+
+   # New Step: Upload Flake8 Lint Report
+   - name: Upload Flake8 Lint Report
+     uses: actions/upload-artifact@v3
+     with:
+      name: lint-report
+      path: messaging_app/messaging_app/lint_report.txt

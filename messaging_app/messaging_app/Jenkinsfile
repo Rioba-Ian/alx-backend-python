@@ -1,0 +1,81 @@
+pipeline {
+    agent any 
+
+    tools {
+        python 'Python3'
+    }
+
+    environment {
+        REPO_URL = ''
+        CREDENTIALS_ID = ''
+
+        // DOCKER 
+        DOCKER_IMAGE = 'messaging_app_image'
+        DOCKER_TAG = 'latest-${env.BUILD_NUMBER}'
+        DOCKER_REGISTRY_CREDENTIALS = ''
+
+        APP_DIR = 'messaging_app'
+        VENV = 'venv'
+
+        SECRET_KEY = 'your_secret_key'
+        DEBUG = 'True'
+        ALLOWED_HOSTS = 'localhost,127.0.0.1'
+        DATABASE_URL = 'sqlite:///db.sqlite3'
+        DATABASE_NAME = 'db.sqlite3'
+        DJANGO_SETTINGS_MODULE = 'messaging_app.settings'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: "${env.REPO_URL}", credentialsId: "${env.CREDENTIALS_ID}"
+            }
+        }
+
+        stage('Setup Virtual Environment') {
+            steps {
+                dir("${env.APP_DIR}") {
+                    sh """
+                        python -m venv ${env.VENV}
+                        source ${env.VENV}/bin/activate
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                    """
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                dir("${env.APP_DIR}") {
+                    sh """
+                        source ${env.VENV}/bin/activate
+                        python manage.py test
+                    """
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir("${env.APP_DIR}") {
+                    sh """
+                        docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} .
+                    """
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${env.DOCKER_REGISTRY_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker tag ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}
+                        docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}
+                    """
+                }
+            }
+        }
+    }
+}
