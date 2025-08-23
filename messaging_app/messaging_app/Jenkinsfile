@@ -35,14 +35,21 @@ pipeline {
             }
         }
 
-        stage('Setup Virtual Environment') {
+        stage('Setup Python venv & install deps') {
             steps {
-                dir("${env.APP_DIR}") {
+                dir("messaging_app/messaging_app") {
                     sh """
-                        python -m venv ${env.VENV}
-                        source ${env.VENV}/bin/activate
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
+                        set -euxo pipefail
+                        python3 --version
+                        python -m venv .venv
+                        source .venv/bin/activate
+                        pip3 install --upgrade pip
+
+
+                        pip3 install -r ../requirements.txt || true 
+                        pip3 install -r messaging_app/requirements.txt || true
+
+                        pip3 install pytest pytest-cov
                     """
                 }
             }
