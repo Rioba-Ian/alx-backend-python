@@ -28,7 +28,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: "${env.REPO_URL}", credentialsId: "${env.CREDENTIALS_ID}"
+                git branch: 'main',
+                    url: "https://github.com/Rioba-Ian/alx-backend-python.git",
+                    credentialsId: "${env.CREDENTIALS_ID}"
+                sh "ls -R ."
             }
         }
 
